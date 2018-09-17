@@ -1,0 +1,2 @@
+# KudosBot
+Slackbot for kudosing
