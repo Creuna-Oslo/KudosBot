@@ -1,5 +1,7 @@
 import os
 from slackclient import SlackClient
+import requests
+import json
 
 
 slack_token = os.environ["SLACK_BOT_KEY"]
@@ -15,10 +17,15 @@ result = sc.api_call(
 
 directChannel=result["channel"]["id"]
  
+r = requests.get("http://10.30.6.26:3001/getUserData?id=mw.olsen")
+data = r.json()
+ 
+ 
 response = sc.api_call(
+	
 	"chat.postMessage",
 	channel=directChannel,
-	text="kan bare du sjå d hær"
+	text="du har %s cudos! %s" % (data['cudos'], ":taco:")
 )
 
 
