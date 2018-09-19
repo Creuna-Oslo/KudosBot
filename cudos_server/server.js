@@ -143,7 +143,7 @@ updateCudos = async (userData, type, value) => {
   }
 };
 
-giveCudos = async (fromUser, toUser, type) => {
+giveCudos = async (fromUser, toUser, type, message) => {
   if (_cudoType.indexOf(type) > -1) {
     var fromUserData = await getUserData(fromUser);
     var toUserData = await getUserData(toUser);
@@ -154,21 +154,31 @@ giveCudos = async (fromUser, toUser, type) => {
       await updateCudos(fromUserData, "cudos", newFromCudosValue);
       await updateCudos(fromUserData, "cudos_given", newFromCudosGivenValue);
       await updateCudos(toUserData, type, newToCudosReceivedValue);
+      sendMessageToReceiver(fromUser, toUser, type, message);
       return { text: `gave 1 cudo to ${toUser}` };
 
     } else return { text: "You don't have enough cudos to peform this action" };
   } else return { text: "Not a valid cudo type, use :avocado:, :unicorn_face: or :tada:" };
 }
 
-validText = (text) => {
+sendMessageToReceiver = async (fromUser, toUser, type, message ) => {
+  var toUserID = await getToUserID(toUser);
+  slackClient.postMessage(toUserID, {
+    text: `${fromUser} har sendt deg en :${
+      type
+      }:, med melding _"${message}"_`
+  }, { as_user: true });
+}
+
+validText = (text, res) => {
   if (text == '') {
     res.send({ text: 'Please specify user, cudo type and message' });
-    return;
+    return false;
   }
   var textSplit = text.split(" ");
   if (textSplit.length < 3) {
     res.send({ text: 'Please specify user, cudo type and message' });
-    return;
+    return false;
   }
   return textSplit;
 }
@@ -177,7 +187,6 @@ getToUserID = async (username) => {
   var users = await slackClient.getAllUserList();
   var userID = '';
   users.forEach(user => {
-
     if (user['name'] == username) {
       userID = user['id']
     }
@@ -189,31 +198,26 @@ const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-
-
 app.post('/giveCudos', asyncMiddleware(async (req, res, next) => {
   const payload = req.body;
-  const textSplit = validText(payload['text']);
-  const type = textSplit[1].slice(1, -1);
-  //message to be used in message sent to receiving user
-  const message = textSplit.slice(2, textSplit.length).join(' ')
+  const textSplit = validText(payload['text'], res);
+  if (!textSplit) {
+    console.log('Illegal input from slack user');
+    return;
+  }
   const fromUser = payload["user_name"];
   const toUser = textSplit[0].substring(1);
+  const type = textSplit[1].slice(1, -1);
+  const message = textSplit.slice(2, textSplit.length).join(' ');
   if(fromUser == toUser){
     res.send({ text: "Jeez.. giving cudos to yourself? :exploding_head:" });
     return;
   }
   const token = payload["token"]
   var response = validToken(token) ?
-    await giveCudos(fromUser, toUser, type)
+    await giveCudos(fromUser, toUser, type, message)
     : { text: "Invalid token" };
   res.send(response);
-  var toUserID = await getToUserID(toUser);
-  slackClient.postMessage(toUserID, {
-    text: `${fromUser} har sendt deg en ${
-      textSplit[1]
-    }, med melding _"${message}"_`
-  }, { as_user: true });
 }));
 
 app.listen(app.get("port"), () => {
