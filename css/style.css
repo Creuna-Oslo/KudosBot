@@ -1,0 +1,73 @@
+@font-face {
+  font-family: "Larsseit bold";
+  src: url("Larsseit/Type Dynamic - Larsseit Bold.otf");
+}
+@font-face {
+  font-family: "Larsseit light";
+  src: url("Larsseit/Type Dynamic - Larsseit Light.otf");
+}
+body,
+html {
+  margin: 0;
+}
+.kudos {
+}
+.cudos-display {
+  display: flex;
+  font-family: "Larsseit light";
+}
+.avocados {
+  height: 100vh;
+  background: #c5fbc5;
+}
+.confettis {
+  height: 100vh;
+  background: #acdbf9;
+}
+.unicorns {
+  height: 100vh;
+  background: #dcc0fa;
+}
+.kudos-container {
+  flex: 1;
+  height: 100%;
+}
+
+.avocado-placement {
+  background: #43b943;
+}
+.confetti-placement {
+  background: #2f53ea;
+}
+.unicorn-placement {
+  background: #b254d4;
+}
+.placement {
+  border-radius: 100%;
+  height: 5rem;
+  width: 5rem;
+  margin: auto;
+  color: white;
+  text-align: center;
+  font-size: 3rem;
+  line-height: 5.5rem;
+  margin-top: 5rem;
+  font-family: "Larsseit bold";
+}
+.name {
+  margin: 2rem 1rem 0.5rem 1rem;
+  font-size: 2rem;
+  text-align: center;
+  font-family: "Larsseit bold";
+}
+.score {
+  text-align: center;
+  font-size: 1.5rem;
+}
+.icon {
+  display: block;
+  margin: auto;
+  padding-top: 5rem;
+  margin-bottom: 7rem;
+  height: 10rem;
+}
