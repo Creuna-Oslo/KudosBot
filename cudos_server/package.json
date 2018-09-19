@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "botkit": "^0.6.16",
+    "express": "^4.16.3",
+    "mongodb": "^3.1.6",
+    "node-fetch": "^2.2.0"
+  }
+}
