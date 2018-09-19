@@ -6,6 +6,11 @@ var mongoClient = require("mongodb").MongoClient;
 const _security = require("./security.json");
 const _cudoType = ["avocado", "unicorn_face", "tada"];
 const url = _security["azure"];
+const { SlackOAuthClient } = require("messaging-api-slack");
+
+const slackClient = SlackOAuthClient.connect(
+  _security["oauth"]
+);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -41,7 +46,6 @@ app.get("/getUserData", (req, res) => {
       var dbo = db.db("creuna-cudos");
       dbo.collection("users").findOne({ id: user }, (err, result) => {
         if (err) throw err;
-        console.log(result);
         res.send(result);
         db.close();
       });
@@ -65,7 +69,6 @@ app.get("/setData", (req, res) => {
           { $set: { [type]: newCudosValue } },
           (err, result) => {
             if (err) throw err;
-            console.log(result);
             res.send(result);
             db.close();
           }
@@ -88,7 +91,6 @@ app.get("/getTopFive", (req, res) => {
         .limit(5)
         .toArray((err, result) => {
           if (err) throw err;
-          console.log(result);
           res.send(result);
           db.close();
         });
@@ -171,9 +173,23 @@ validText = (text) => {
   return textSplit;
 }
 
+getToUserID = async (username) => {
+  var users = await slackClient.getAllUserList();
+  var userID = '';
+  users.forEach(user => {
+
+    if (user['name'] == username) {
+      userID = user['id']
+    }
+  })
+  return userID;
+}
+
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
+
+
 
 app.post('/giveCudos', asyncMiddleware(async (req, res, next) => {
   const payload = req.body;
@@ -181,7 +197,6 @@ app.post('/giveCudos', asyncMiddleware(async (req, res, next) => {
   const type = textSplit[1].slice(1, -1);
   //message to be used in message sent to receiving user
   const message = textSplit.slice(2, textSplit.length).join(' ')
-  console.log(message);
   const fromUser = payload["user_name"];
   const toUser = textSplit[0].substring(1);
   if(fromUser == toUser){
@@ -193,6 +208,12 @@ app.post('/giveCudos', asyncMiddleware(async (req, res, next) => {
     await giveCudos(fromUser, toUser, type)
     : { text: "Invalid token" };
   res.send(response);
+  var toUserID = await getToUserID(toUser);
+  slackClient.postMessage(toUserID, {
+    text: `${fromUser} har sendt deg en ${
+      textSplit[1]
+    }, med melding _"${message}"_`
+  }, { as_user: true });
 }));
 
 app.listen(app.get("port"), () => {
@@ -214,7 +235,6 @@ app.get("/getTopAvocado", (req, res) => {
         .limit(3)
         .toArray((err, result) => {
           if (err) throw err;
-          console.log(result);
           res.send(result);
           db.close();
         });
@@ -235,7 +255,6 @@ app.get("/getTopConfetti", (req, res) => {
         .limit(3)
         .toArray((err, result) => {
           if (err) throw err;
-          console.log(result);
           res.send(result);
           db.close();
         });
@@ -256,7 +275,6 @@ app.get("/getTopUnicorn", (req, res) => {
         .limit(3)
         .toArray((err, result) => {
           if (err) throw err;
-          console.log(result);
           res.send(result);
           db.close();
         });
