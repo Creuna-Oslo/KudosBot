@@ -86,7 +86,7 @@ app.post("/cudos", (req, res) => {
       var dbo = db.db("creuna-cudos");
       dbo.collection("users").findOne({ 'id': user }, (err, result) => {
             if (err) throw err;
-            var payload = { text: `cudos: ${result["cudos"]}\n cudos given: ${result["cudos_given"]}\n cudos received: ${result["cudos_received"]}` };
+        var payload = { text: `cudos to give: ${result["cudos"]}\n cudos given: ${result["cudos_given"]}\n :avocado: ${result["avocado"]}\n :unicorn_face: ${result["unicorn_face"]}\n :tada: ${result["tada"]}` };
             res.send(payload);
             db.close();
           }
@@ -129,8 +129,8 @@ giveCudos = async (fromUser, toUser, type) => {
       await updateCudos(toUserData, type, newToCudosReceivedValue);
       return { text: `gave 1 cudo to ${toUser}` };
 
-    } else return { text: "you don't have enough cudos to peform this action" };
-  } else return { text: "not a valid cudo type, use :avocado:, :unicorn_face: or :tada:" };
+    } else return { text: "You don't have enough cudos to peform this action" };
+  } else return { text: "Not a valid cudo type, use :avocado:, :unicorn_face: or :tada:" };
   
 }
 
@@ -145,11 +145,24 @@ const asyncMiddleware = fn =>
 app.post('/giveCudos', asyncMiddleware(async (req, res, next) => {
   const args = req.body;
   const fromUser = args['user_name']
+  if(args['text'] == ''){
+    res.send({text : 'Please specify user, cudo type and message'});
+    return;
+  }
   var textSplit = args["text"].split(" ");
+  if(textSplit.length < 3){
+    res.send({ text: 'Please specify user, cudo type and message' });
+    return;
+  }
   const type = textSplit[1].slice(1, -1);
   //message to be used in message sent to receiving user
-  const message = textSplit[2]
+  const message = textSplit.slice(2, textSplit.length).join(' ')
+  console.log(message);
   const toUser = textSplit[0].substring(1);
+  if(fromUser == toUser){
+    res.send({ text: "Jeez.. giving cudos to yourself? :exploding_head:" });
+    return;
+  }
   const token = args["token"]
   var response = validToken(token) ?
     await giveCudos(fromUser, toUser, type)
