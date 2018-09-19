@@ -97,8 +97,8 @@ app.get("/getTopFive", (req, res) => {
 });
 
 app.post("/cudos", (req, res) => {
-  const args = req.body;
-  const user = args["user_name"];
+  const payload = req.body;
+  const user = payload["user_name"];
   mongoClient.connect(
     url,
     (err, db) => {
@@ -114,6 +114,10 @@ app.post("/cudos", (req, res) => {
     } );
 });
 
+validToken = token => token == _security["token"];
+
+validateCudoBalance = userData => userData["cudos"] > 0;
+
 getUserData = async user => {
   let client = await mongoClient.connect(url);
   let db = client.db("creuna-cudos");
@@ -123,8 +127,6 @@ getUserData = async user => {
     client.close();
   }
 };
-
-validateCudoBalance = userData => userData["cudos"] > 0;
 
 updateCudos = async (userData, type, value) => {
   let client = await mongoClient.connect(url);
@@ -154,37 +156,39 @@ giveCudos = async (fromUser, toUser, type) => {
 
     } else return { text: "You don't have enough cudos to peform this action" };
   } else return { text: "Not a valid cudo type, use :avocado:, :unicorn_face: or :tada:" };
-  
 }
 
-validToken = token => token == _security["token"];
+validText = (text) => {
+  if (text == '') {
+    res.send({ text: 'Please specify user, cudo type and message' });
+    return;
+  }
+  var textSplit = text.split(" ");
+  if (textSplit.length < 3) {
+    res.send({ text: 'Please specify user, cudo type and message' });
+    return;
+  }
+  return textSplit;
+}
 
 const asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 app.post('/giveCudos', asyncMiddleware(async (req, res, next) => {
-  const args = req.body;
-  const fromUser = args['user_name']
-  if(args['text'] == ''){
-    res.send({text : 'Please specify user, cudo type and message'});
-    return;
-  }
-  var textSplit = args["text"].split(" ");
-  if(textSplit.length < 3){
-    res.send({ text: 'Please specify user, cudo type and message' });
-    return;
-  }
+  const payload = req.body;
+  const textSplit = validText(payload['text']);
   const type = textSplit[1].slice(1, -1);
   //message to be used in message sent to receiving user
   const message = textSplit.slice(2, textSplit.length).join(' ')
   console.log(message);
+  const fromUser = payload["user_name"];
   const toUser = textSplit[0].substring(1);
   if(fromUser == toUser){
     res.send({ text: "Jeez.. giving cudos to yourself? :exploding_head:" });
     return;
   }
-  const token = args["token"]
+  const token = payload["token"]
   var response = validToken(token) ?
     await giveCudos(fromUser, toUser, type)
     : { text: "Invalid token" };
