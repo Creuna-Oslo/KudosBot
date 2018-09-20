@@ -27,6 +27,7 @@ html {
   line-height: 2rem;
   width: 400vw;
   font-size: 0.8rem;
+  display: flex;
 }
 .cudos-display {
   display: flex;
@@ -97,4 +98,17 @@ html {
 }
 .white {
   color: white;
+}
+
+.gotCudos {
+  margin-top: 2px;
+  padding-left: 25px;
+  padding-right: 5px;
+  font-family: "Larsseit";
+}
+
+.emoji {
+  margin-top: 8px;
+  width: 15px;
+  height: 15px;
 }

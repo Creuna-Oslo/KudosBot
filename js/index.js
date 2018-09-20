@@ -62,12 +62,11 @@ function createTopThree(user, score, eleClass, index, color) {
   return $user;
 }
 $(document).ready(() => {
-  Promise.all([getAvocados, getConfetti, getUnicorns]).then(data => {
-    update();
-  });
   //animate header
+  update();
   function moveLeft(header, time) {
     const screenWidth = window.innerWidth;
+    console.log(screenWidth);
     setTimeout(
       () =>
         header.css({
@@ -84,9 +83,11 @@ $(document).ready(() => {
       header.css({
         transform: "translate(" + 0 + "px)"
       });
+      console.log("skip");
       moveLeft(header, time);
-    }, time * 1000 - 370);
+    }, time * 1000 + 30);
   }
+
   const headers = [$(".header1"), $(".header2")];
   moveLeft($(".header1"), 12);
 });
@@ -102,40 +103,66 @@ function checkForUpdate() {
     })
     .then(data => {
       data.map((user, i) => {
-        console.log("cudos:", prevData[i].cudos, user.cudos);
-        if (prevData[i].cudos !== user.cudos) {
+        console.log("cudos:", prevData[i].cudos_given, user.cudos_given);
+        if (prevData[i].cudos_given !== user.cudos_given) {
           shouldUpdate = true;
           name = user.id;
         }
       });
       prevData = data;
+      sortUsers(data);
     });
   if (shouldUpdate) {
     clearScoreboard();
-    console.log("IS UPDATING");
     update();
+    console.log("sghould update");
     shouldUpdate = false;
   }
   console.log(prevData);
 }
 function update() {
-  console.log("ohijasfhfas");
-  topUnicorn.map((user, index) =>
-    createTopThree(user, user.unicorn_face, "unicorn", index, " red").appendTo(
-      ".unicorns"
-    )
-  );
-  topAvocado.map((user, index) =>
-    createTopThree(user, user.avocado, "avocado", index, "").appendTo(
-      ".avocados"
-    )
-  );
-  topConfetti.map((user, index) =>
-    createTopThree(user, user.tada, "confetti", index, " white").appendTo(
-      ".confettis"
-    )
-  );
+  console.log("updating");
+  Promise.all([getAvocados, getConfetti, getUnicorns]).then(data => {
+    topUnicorn.map((user, index) =>
+      createTopThree(
+        user,
+        user.unicorn_face,
+        "unicorn",
+        index,
+        " red"
+      ).appendTo(".unicorns")
+    );
+    topAvocado.map((user, index) =>
+      createTopThree(user, user.avocado, "avocado", index, "").appendTo(
+        ".avocados"
+      )
+    );
+    topConfetti.map((user, index) =>
+      createTopThree(user, user.tada, "confetti", index, " white").appendTo(
+        ".confettis"
+      )
+    );
+  });
 }
 function clearScoreboard() {
   $(".user-wrapper").remove();
+}
+function sortUsers(users) {
+  let sortedByAvocado = users.sort((user, i) => {
+    return user.avocado - i.avocado;
+  });
+  let sortedByConfetti = users.sort((user, i) => {
+    return user.tada - i.tada;
+  });
+  let sortedByUnicorn = users.sort((user, i) => {
+    return user.unicorn_face - i.unicorn_face;
+  });
+  topAvocado = [];
+  topConfetti = [];
+  topUnicorn = [];
+  for (let i = 0; i <= 2; i++) {
+    topAvocado.push(sortedByAvocado[sortedByAvocado.length - (1 + i)]);
+    topConfetti.push(sortedByConfetti[sortedByConfetti.length - (1 + i)]);
+    topUnicorn.push(sortedByUnicorn[sortedByUnicorn.length - (1 + i)]);
+  }
 }
