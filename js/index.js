@@ -74,6 +74,7 @@ $(document).ready(() => {
   //animate header
   function moveLeft(header, time) {
     const screenWidth = window.innerWidth;
+    console.log(screenWidth);
     setTimeout(
       () =>
         header.css({
@@ -90,9 +91,11 @@ $(document).ready(() => {
       header.css({
         transform: "translate(" + 0 + "px)"
       });
+      console.log("skip");
       moveLeft(header, time);
-    }, time * 1000 - 370);
+    }, time * 1000 + 30);
   }
+
   const headers = [$(".header1"), $(".header2")];
   moveLeft($(".header1"), 12);
 });
