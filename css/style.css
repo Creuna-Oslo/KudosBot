@@ -12,6 +12,9 @@ html {
   height: 100vh;
 }
 .kudos {
+  display: flex;
+  height: 100vh;
+  flex-direction: column;
   background: #000000;
   font-family: "Larsseit light";
 }
@@ -43,9 +46,9 @@ html {
 }
 .kudos-container {
   flex: 1;
-  height: 100%;
 }
-
+.user-wrapper {
+}
 .avocado-placement {
   background: #ff1313;
 }
@@ -65,11 +68,11 @@ html {
   text-align: center;
   font-size: 2rem;
   line-height: 3.3rem;
-  margin-top: 5rem;
+  margin-top: 20%;
   font-family: "Larsseit bold";
 }
 .name {
-  margin: 2rem 1rem 0.5rem 1rem;
+  margin: 5% 2% 1% 2%;
   font-size: 1rem;
   text-align: center;
   font-family: "Larsseit bold";
@@ -81,9 +84,13 @@ html {
 .icon {
   display: block;
   margin: auto;
-  padding-top: 5rem;
+  padding-top: 20%;
   margin-bottom: 7rem;
   height: 9rem;
+}
+.avocados > .user-wrapper > .icon {
+  padding-top: 23%;
+  height: 8rem;
 }
 .red {
   color: #ff1313;
