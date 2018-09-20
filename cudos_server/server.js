@@ -1,15 +1,16 @@
-const express = require("express");
-const app = express();
-const bodyParser = require("body-parser");
-const assert = require("assert");
-var mongoClient = require("mongodb").MongoClient;
-const _security = require("./security.json");
-const _cudoType = ["avocado", "unicorn_face", "tada"];
-const _emojiDictionary = {"129412":":unicorn_face:", "129361":":avocado:", "127881" : ":tada:"}
-const url = _security["azure"];
-const { SlackOAuthClient } = require("messaging-api-slack");
+let express = require("express");
+let app = express();
+let bodyParser = require("body-parser");
+let assert = require("assert");
+let mongoClient = require("mongodb").MongoClient;
+let _security = require("./security.json");
+let _cudoType = ["avocado", "unicorn_face", "tada"];
+let _emojiDictionary = {"129412":":unicorn_face:", "129361":":avocado:", "127881" : ":tada:"}
+let _intros = ["Oh jolly! ", "Is this the real life? Is this just fantasy? No,  " , "This must be your lucky day!"];
+let url = _security.azure;
+let { SlackOAuthClient } = require("messaging-api-slack");
 
-const slackClient = SlackOAuthClient.connect(_security["oauth"]);
+let slackClient = SlackOAuthClient.connect(_security.oauth);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -19,15 +20,16 @@ app.use((req, res, next) => {
   next();
 });
 
-app.set("port", 3001);
+
+app.set("port", process.env.PORT || 3001);
 
 app.get("/", (req, res) => {
-  res.send("Cudos slah command API up and running");
+  res.send("Cudos slash command API up and running");
 });
 
-validToken = token => token == _security["token"];
+validToken = token => token == _security.token;
 
-validCudoBalance = userData => userData["cudos"] > 0;
+validCudoBalance = userData => userData.cudos > 0;
 
 getData = async func => {
   let client = await mongoClient.connect(url);
@@ -53,56 +55,68 @@ getTopListData = async type =>
         .toArray()
   );
 
+getAllUserData = async () =>
+  await getData(
+    async db =>
+      await db
+        .collection("users")
+        .find({})
+        .toArray()
+  );
+
+getIntro = () => _intros[Math.floor((Math.random() * intros.length))];
+
 updateCudos = async (userData, type, value) =>
   await getData(async db =>
     db
       .collection("users")
-      .updateOne({ id: userData["id"] }, { $set: { [type]: value } })
+      .updateOne({ id: userData.id }, { $set: { [type]: value } })
   );
 
 giveCudos = async (fromUser, toUser, type, message) => {
   if (_cudoType.indexOf(type) <= -1)
     return 'Whoops! You have entered an invalid command :scream: Please only use the emojis :avocado:, :unicorn_face: or :tada:, and write your command on the form /givecudos @user :emoji: message';
-  var fromUserData = await getUserData(fromUser);
+  let fromUserData = await getUserData(fromUser);
   if (!validCudoBalance(fromUserData))
     return "You don't have enough cudos to peform this action";
-  var toUserID = await getToUserID(toUser);
+  let toUserID = await getToUserID(toUser);
   if(!toUserID){
     return "Oh, this user doesn't exist.. I'm sure not all your friends are imaginary :cry:";
   }
-  var toUserData = await getUserData(toUser);
+  let toUserData = await getUserData(toUser);
   await updateCudos(fromUserData, "cudos", fromUserData.cudos -1);
   await updateCudos(fromUserData, "cudos_given", fromUserData.cudos_given + 1);
   await updateCudos(toUserData, type, toUserData[type] + 1);
   sendMessageToReceiver(fromUser, toUserID, type, message);
-  return `Wow! You just gave 1 :${type}: to <@${toUser}> with the message _"${message}"_, I'm sure that made their day! :blush:`;
+  return `Wow! You just gave a :${type}: to <@${toUser}> with the message _"${message}"_, I'm sure you made their day! :blush:`;
 };
 
 sendMessageToReceiver = async (fromUser, toUserID, type, message) => {
-  slackClient.postMessage(toUserID, { text: `Oh jolly! <@${fromUser}> just sent you a :${type}:, with the message: _"${message}"_. Good on you! :sunglasses:` }, { as_user: true });
+  intro = type == 'avocado' ? 'Holy Guacemole!' : getIntro();
+  slackClient.postMessage(toUserID, { text: `${intro} <@${fromUser}> just sent you a :${type}:, with the message: _"${message}"_. Good on you! :sunglasses:` }, { as_user: true });
 };
 
 getToUserID = async username => {
-  var users = await slackClient.getAllUserList();
-  var userID = "";
-  users.forEach(user => {
-    if (user["name"] == username) {
-      userID = user["id"];
+  let users = await slackClient.getAllUserList();
+  let userID = false;
+  users.map(user => {
+    if (user.name == username) {
+      userID = user.id;
     }
   });
-  return !userID == "" ? userID : false;
+  return userID;
 };
 
-const asyncMiddleware = fn => (req, res, next) => {
+let asyncMiddleware = fn => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 app.post(
   "/cudos",
   asyncMiddleware(async (req, res, next) => {
-    const userName = req.body["user_name"];
+    let userName = req.body.user_name;
     let user = await getUserData(userName);
-    var payload = {
+    let payload = {
       text: `cudos to give: ${user.cudos}\n cudos given: ${
         user.cudos_given
       }\n :avocado: ${user.avocado}\n :unicorn_face: ${
@@ -119,16 +133,15 @@ validEmoji = emoji =>
     : emoji.slice(1,-1);
 
 parseGiveCudosParameters = payload => {
-  var result = {};
-  var textSplit = payload.text.replace(/ +(?= )/g, '').split(" ");
+  let result = {};
+  let textSplit = payload.text.replace(/ +(?= )/g, '').split(" ");
   if (textSplit.length < 3) {
-    result.error = "Please specify user, cudo type and message";
+    result.error = "Oh bugger! You didn't specify a user, emoji and message, try to write your command on the form /givecudos @user :emoji: message";
     return result;
   }
   result.toUser = textSplit[0].replace('@', '');
   result.fromUser = payload.user_name;
   result.type = validEmoji(textSplit[1]);
-  console.log(result.type)
   result.message = textSplit.slice(2, textSplit.length).join(" ");
   result.token = payload.token;
   if (!validToken(result.token)) result.error = "Invalid token";
@@ -140,7 +153,7 @@ parseGiveCudosParameters = payload => {
 app.post(
   "/giveCudos",
   asyncMiddleware(async (req, res, next) => {
-    const parameters = parseGiveCudosParameters(req.body);
+    let parameters = parseGiveCudosParameters(req.body);
     if (parameters.error) {
       res.send(parameters.error);
       return;
@@ -163,6 +176,14 @@ app.get(
   "/getTopList",
   asyncMiddleware(async (req, res, next) => {
     let result = await getTopListData(req.query.type);
+    res.send(result);
+  })
+);
+
+app.get(
+  "/getAllUserData",
+  asyncMiddleware(async (req, res, next) => {
+    let result = await getAllUserData(req.query.type);
     res.send(result);
   })
 );
