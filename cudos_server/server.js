@@ -5,6 +5,7 @@ const assert = require("assert");
 var mongoClient = require("mongodb").MongoClient;
 const _security = require("./security.json");
 const _cudoType = ["avocado", "unicorn_face", "tada"];
+const _emojiDictionary = {"129412":":unicorn_face:", "129361":":avocado:", "127881" : ":tada:"}
 const url = _security["azure"];
 const { SlackOAuthClient } = require("messaging-api-slack");
 
@@ -61,27 +62,24 @@ updateCudos = async (userData, type, value) =>
 
 giveCudos = async (fromUser, toUser, type, message) => {
   if (_cudoType.indexOf(type) <= -1)
-    return 'Invalid cudo type, use :avocado:, :unicorn_face: or :tada:';
+    return 'Whoops! You have entered an invalid command :scream: Please only use the emojis :avocado:, :unicorn_face: or :tada:, and write your command on the form /givecudos @user :emoji: message';
   var fromUserData = await getUserData(fromUser);
   if (!validCudoBalance(fromUserData))
     return "You don't have enough cudos to peform this action";
+  var toUserID = await getToUserID(toUser);
+  if(!toUserID){
+    return "Oh, this user doesn't exist.. I'm sure not all your friends are imaginary :cry:";
+  }
   var toUserData = await getUserData(toUser);
   await updateCudos(fromUserData, "cudos", fromUserData.cudos -1);
   await updateCudos(fromUserData, "cudos_given", fromUserData.cudos_given + 1);
   await updateCudos(toUserData, type, toUserData[type] + 1);
-  sendMessageToReceiver(fromUser, toUser, type, message);
-  return `gave 1 cudo to ${toUser}`;
+  sendMessageToReceiver(fromUser, toUserID, type, message);
+  return `Wow! You just gave 1 :${type}: to <@${toUser}> with the message _"${message}"_, I'm sure that made their day! :blush:`;
 };
 
-sendMessageToReceiver = async (fromUser, toUser, type, message) => {
-  var toUserID = await getToUserID(toUser);
-  slackClient.postMessage(
-    toUserID,
-    {
-      text: `${fromUser} har sendt deg en :${type}:, med melding _"${message}"_`
-    },
-    { as_user: true }
-  );
+sendMessageToReceiver = async (fromUser, toUserID, type, message) => {
+  slackClient.postMessage(toUserID, { text: `Oh jolly! <@${fromUser}> just sent you a :${type}:, with the message: _"${message}"_. Good on you! :sunglasses:` }, { as_user: true });
 };
 
 getToUserID = async username => {
@@ -115,16 +113,22 @@ app.post(
   })
 );
 
+validEmoji = emoji =>
+  emoji.codePointAt(0) in _emojiDictionary
+    ? _emojiDictionary[emoji.codePointAt(0)].slice(1,-1)
+    : emoji.slice(1,-1);
+
 parseGiveCudosParameters = payload => {
   var result = {};
-  var textSplit = payload.text.split(" ");
+  var textSplit = payload.text.replace(/ +(?= )/g, '').split(" ");
   if (textSplit.length < 3) {
     result.error = "Please specify user, cudo type and message";
     return result;
   }
-  result.toUser = textSplit[0].substring(1);
+  result.toUser = textSplit[0].replace('@', '');
   result.fromUser = payload.user_name;
-  result.type = textSplit[1].slice(1, -1);
+  result.type = validEmoji(textSplit[1]);
+  console.log(result.type)
   result.message = textSplit.slice(2, textSplit.length).join(" ");
   result.token = payload.token;
   if (!validToken(result.token)) result.error = "Invalid token";
