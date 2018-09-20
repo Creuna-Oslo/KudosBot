@@ -9,24 +9,37 @@
 body,
 html {
   margin: 0;
+  height: 100vh;
 }
 .kudos {
+  background: #000000;
+  font-family: "Larsseit light";
+}
+.header {
+  display: -webkit-box;
+}
+.header1 {
+  height: 2rem;
+  color: white;
+  line-height: 2rem;
+  width: 400vw;
+  font-size: 0.8rem;
 }
 .cudos-display {
   display: flex;
-  font-family: "Larsseit light";
+  height: 100%;
 }
 .avocados {
-  height: 100vh;
-  background: #c5fbc5;
+  height: 100%;
+  background: #fcedac;
 }
 .confettis {
-  height: 100vh;
-  background: #acdbf9;
+  height: 100%;
+  background: #ff1313;
 }
 .unicorns {
-  height: 100vh;
-  background: #dcc0fa;
+  height: 100%;
+  background: #fff34d;
 }
 .kudos-container {
   flex: 1;
@@ -34,40 +47,47 @@ html {
 }
 
 .avocado-placement {
-  background: #43b943;
+  background: #ff1313;
 }
 .confetti-placement {
-  background: #2f53ea;
+  background: #fff34d;
+  color: black !important;
 }
 .unicorn-placement {
-  background: #b254d4;
+  background: #000000;
 }
 .placement {
   border-radius: 100%;
-  height: 5rem;
-  width: 5rem;
+  height: 2.8rem;
+  width: 2.8rem;
   margin: auto;
   color: white;
   text-align: center;
-  font-size: 3rem;
-  line-height: 5.5rem;
+  font-size: 2rem;
+  line-height: 3.3rem;
   margin-top: 5rem;
   font-family: "Larsseit bold";
 }
 .name {
   margin: 2rem 1rem 0.5rem 1rem;
-  font-size: 2rem;
+  font-size: 1rem;
   text-align: center;
   font-family: "Larsseit bold";
 }
 .score {
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 .icon {
   display: block;
   margin: auto;
   padding-top: 5rem;
   margin-bottom: 7rem;
-  height: 10rem;
+  height: 9rem;
+}
+.red {
+  color: #ff1313;
+}
+.white {
+  color: white;
 }
