@@ -6,7 +6,7 @@ let mongoClient = require("mongodb").MongoClient;
 let _security = require("./security.json");
 let _cudoType = ["avocado", "unicorn_face", "tada"];
 let _emojiDictionary = {"129412":":unicorn_face:", "129361":":avocado:", "127881" : ":tada:"}
-let _intros = ["Oh jolly! ", "Is this the real life? Is this just fantasy? No,  " , "This must be your lucky day!"];
+let _intros = ["Oh jolly! ", "Is this the real life? Is this just fantasy? No," , "This must be your lucky day!"];
 let url = _security.azure;
 let { SlackOAuthClient } = require("messaging-api-slack");
 
@@ -64,7 +64,7 @@ getAllUserData = async () =>
         .toArray()
   );
 
-getIntro = () => _intros[Math.floor((Math.random() * intros.length))];
+getIntro = () => _intros[Math.floor((Math.random() * _intros.length))];
 
 updateCudos = async (userData, type, value) =>
   await getData(async db =>
@@ -88,11 +88,13 @@ giveCudos = async (fromUser, toUser, type, message) => {
   await updateCudos(fromUserData, "cudos_given", fromUserData.cudos_given + 1);
   await updateCudos(toUserData, type, toUserData[type] + 1);
   sendMessageToReceiver(fromUser, toUserID, type, message);
+  console.log(`Wow! You just gave a :${type}: to <@${toUser}> with the message _"${message}"_, I'm sure you made their day! :blush:`);
   return `Wow! You just gave a :${type}: to <@${toUser}> with the message _"${message}"_, I'm sure you made their day! :blush:`;
 };
 
 sendMessageToReceiver = async (fromUser, toUserID, type, message) => {
   intro = type == 'avocado' ? 'Holy Guacemole!' : getIntro();
+  console.log(`${intro} <@${fromUser}> just sent you a :${type}:, with the message: _"${message}"_. Good on you! :sunglasses:`);
   slackClient.postMessage(toUserID, { text: `${intro} <@${fromUser}> just sent you a :${type}:, with the message: _"${message}"_. Good on you! :sunglasses:` }, { as_user: true });
 };
 
@@ -116,13 +118,27 @@ app.post(
   asyncMiddleware(async (req, res, next) => {
     let userName = req.body.user_name;
     let user = await getUserData(userName);
-    let payload = {
-      text: `cudos to give: ${user.cudos}\n cudos given: ${
-        user.cudos_given
-      }\n :avocado: ${user.avocado}\n :unicorn_face: ${
-        user.unicorn_face
-      }\n :tada: ${user.tada}`
-    };
+    if(!validToken(req.body.token)) {
+      res.send("Invalid token");
+      return;
+    }
+    let payload = 
+      {
+      attachments: [
+        {
+          "title": "Cudos Available",
+          "text": `:coin: : ${user.cudos}`,
+          "color": "#F7A70A"
+        },
+        {
+          "title": "Cudos Received",
+          "text": `:avocado: : ${ user.avocado }\n :unicorn_face: : ${
+          user.unicorn_face
+        }\n :tada: : ${ user.tada }`,
+          "color": "#71BC78"
+        }
+      ]
+    }
     res.send(payload);
   })
 );
