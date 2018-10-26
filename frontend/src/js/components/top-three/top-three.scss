@@ -1,0 +1,13 @@
+.top-three__container {
+  flex: 1;
+  & > div {
+    height: 100%;
+  }
+}
+.icon {
+  display: block;
+  margin: auto;
+  padding-top: 10vh;
+  margin-bottom: 7vh;
+  height: 15vh;
+}

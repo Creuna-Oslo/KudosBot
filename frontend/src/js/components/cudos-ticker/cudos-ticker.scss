@@ -1,0 +1,34 @@
+.cudos-ticker {
+  display: -webkit-box;
+  overflow: hidden;
+  &__inner {
+    overflow: hidden;
+    height: 2rem;
+    color: white;
+    line-height: 2rem;
+    padding-left: 100%;
+    font-size: 1rem;
+    display: flex;
+  }
+
+  &__receiver {
+    height: calc(100% - 8px);
+    display: flex;
+    padding: 4px;
+    & > p {
+      margin: 0;
+    }
+  }
+  &__icon {
+    height: 100%;
+  }
+}
+
+@keyframes rollingText {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-100vw, 0);
+  }
+}

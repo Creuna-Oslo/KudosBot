@@ -1,0 +1,13 @@
+@font-face {
+  font-family: "Larsseit bold";
+  src: url("./assets/Type Dynamic - Larsseit Bold.otf");
+}
+@font-face {
+  font-family: "Larsseit light";
+  src: url("./assets/Type Dynamic - Larsseit Light.otf");
+}
+
+@import "/js/components/display/display.scss";
+@import "/js/components/top-three/top-three.scss";
+@import "/js/components/user/user.scss";
+@import "/js/components/cudos-ticker/cudos-ticker.scss";

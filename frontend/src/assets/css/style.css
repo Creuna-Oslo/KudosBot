@@ -1,0 +1,47 @@
+.header {
+  display: -webkit-box;
+}
+.header1 {
+  overflow: hidden;
+  height: 2rem;
+  color: white;
+  line-height: 2rem;
+  width: 200vw;
+  padding-left: 100%;
+  font-size: 0.8rem;
+  display: flex;
+  animation: rollingText 20s linear infinite;
+}
+@keyframes rollingText {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-200vw, 0);
+  }
+}
+
+/*
+.avocados > .user-wrapper > .icon {
+  padding-top: 23%;
+  height: 11vh;
+}*/
+.red {
+  color: #ff1313;
+}
+.white {
+  color: white;
+}
+
+.gotCudos {
+  margin-top: 2px;
+  margin-left: 25px;
+  margin-right: 5px;
+  font-family: "Larsseit";
+}
+
+.emoji {
+  margin-top: 8px;
+  width: 15px;
+  height: 15px;
+}
