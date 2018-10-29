@@ -1,21 +1,26 @@
+const uuidv1 = require("uuid/v1");
+
 export function MOCKrequestLoop(previousUserLists, callback) {
   MOCKgetAll().then(nextUserLists => {
+    let shouldCallBack = false;
+    let recipients = [];
     for (let userListName in previousUserLists) {
       const nextUserList = nextUserLists[userListName];
       previousUserLists[userListName].map((previousUser, index) => {
         const nextUser = nextUserList[index];
         const cudosType = userListName.slice(3).toLowerCase();
-        const receiver = getReceiverIfNoMatch(
+        const recipient = getRecipientsIfNoMatch(
           previousUser,
           nextUser,
           cudosType
         );
-        if (receiver) {
-          console.log("updating state");
-          callback(receiver, nextUserLists);
+        if (recipient) {
+          shouldCallBack = true;
+          recipients.push(recipient);
         }
       });
     }
+    if (shouldCallBack) callback(recipients, nextUserLists);
     //callback({ name: "atle", cudosType: "tada" }, nextUserLists);
     setTimeout(() => MOCKrequestLoop(nextUserLists, callback), 2000);
   });
@@ -95,11 +100,12 @@ function sortUsers(userList, cudosType) {
     .reverse();
 }
 
-function getReceiverIfNoMatch(previousUser, nextUser, cudosType) {
+function getRecipientsIfNoMatch(previousUser, nextUser, cudosType) {
   if (previousUser[cudosType] !== nextUser[cudosType]) {
     return {
       name: nextUser.id,
-      cudosType
+      cudosType,
+      id: uuidv1()
     };
   }
   return false;

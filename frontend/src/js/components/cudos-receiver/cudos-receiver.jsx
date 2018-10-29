@@ -1,23 +1,37 @@
 import React from "react";
-import styled from "styled-components";
-
-const StyledCudosReceiver = styled.div`
-  animation: ${props => props.rollingText} 10s linear infinite;
-`;
 
 class CudosReceiver extends React.Component {
+  cudosRecipientRef = React.createRef();
+
   componentDidMount() {
-    setTimeout(() => this.props.addCudosReceiverPadding(), 500);
+    const width = this.cudosRecipientRef.current.offsetWidth;
+    this.props.storeElementData(
+      width,
+      this.cudosRecipientRef,
+      this.props.index
+    );
+    this.props.animateLeft(this.props.index);
+    /*setTimeout(() => {
+      this.props.loadRecipient();
+      this.forceUpdate();
+    }, 10000);*/
+  }
+  componentDidUpdate() {
+    //this.props.animateLeft(this.props.);
   }
 
   render() {
+    console.log("testing");
     return (
-      <StyledCudosReceiver
-        rollingText={this.props.rollingText}
-        className={this.props.className}
+      <div
+        ref={this.cudosRecipientRef}
+        className="cudos-ticker__receiver"
+        style={{
+          transform: `translateX(-${this.props.translate}px)`
+        }}
       >
         {this.props.children}
-      </StyledCudosReceiver>
+      </div>
     );
   }
 }

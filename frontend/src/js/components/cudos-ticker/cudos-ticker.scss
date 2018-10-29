@@ -1,7 +1,9 @@
 .cudos-ticker {
   display: -webkit-box;
   overflow: hidden;
+
   &__inner {
+    position: relative;
     overflow: hidden;
     height: 2rem;
     color: white;
@@ -12,23 +14,16 @@
   }
 
   &__receiver {
+    position: absolute;
     height: calc(100% - 8px);
     display: flex;
     padding: 4px;
+    transition: transform 10s linear;
     & > p {
       margin: 0;
     }
   }
   &__icon {
     height: 100%;
-  }
-}
-
-@keyframes rollingText {
-  0% {
-    transform: translate(0, 0);
-  }
-  100% {
-    transform: translate(-100vw, 0);
   }
 }

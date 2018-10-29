@@ -31,9 +31,7 @@ class Display extends React.Component {
         isLoading: false,
         ...userLists
       });
-      MOCKrequestLoop(userLists, (cudosReceiver, userLists) => {
-        const cudosReceivers = this.state.cudosReceivers;
-        cudosReceivers.push(cudosReceiver);
+      MOCKrequestLoop(userLists, (cudosReceivers, userLists) => {
         this.setState({ cudosReceivers, ...userLists });
       });
     });
@@ -44,8 +42,12 @@ class Display extends React.Component {
   __resetCudos() {
     MOCKresetCudos();
   }
+  clearRecipients = () => {
+    this.setState({
+      cudosReceivers: []
+    });
+  };
   render() {
-    console.log(this.state);
     if (this.state.isLoading) {
       return <div>Loading...</div>;
     } else {
@@ -54,6 +56,7 @@ class Display extends React.Component {
           <CudosTicker
             ref={ref => (this.ref = ref)}
             cudosReceivers={this.state.cudosReceivers}
+            clearRecipients={() => this.clearRecipients()}
           />
           <div className="cudos-display">
             <button onClick={() => this.__giveCudos()} />

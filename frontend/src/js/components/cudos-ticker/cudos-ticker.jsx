@@ -1,55 +1,69 @@
 import React from "react";
-import { rollingText } from "../../utils/keyframes";
 
 import CudosReceiver from "../cudos-receiver";
+import { resolve } from "url";
 
 class CudosTicker extends React.Component {
-  state = {
-    paddingLeft: []
-  };
-  cudosReceiverRef = React.createRef();
+  prevRecipientsTimeToMove = 0;
+  readyForRecipient = true;
+  pendingRecipients = [];
+  recipients = [];
 
-  addCudosReceiverPadding = () => {
-    console.log(this.cudosReceiverRef.current);
-    /*this.setState({
-      paddingLeft: paddingLeft.concat(this.cudosReceiverRef.current)
-    });*/
-  };
-
-  componentDidMount() {
-    setTimeout(() => console.log(this.cudosReceiverRef.current), 300);
+  componentDidUpdate() {
+    if (this.props.cudosReceivers.length !== 0) {
+      this.pendRecipients(this.props.cudosReceivers);
+    }
   }
-  addReceiver = user => {
-    const cudosReceivers = this.state.cudosReceivers;
-    cudosReceivers.push(user);
-    this.setState({
-      cudosReceivers
+  tryAddingRecipients = () => {
+    if (this.readyForRecipient) {
+      this.recipients.push(...this.pendingRecipients);
+      this.pendingRecipients = [];
+      this.props.clearRecipients();
+    }
+  };
+
+  pendRecipients = recipients => {
+    this.pendingRecipients = recipients;
+    this.tryAddingRecipients();
+  };
+
+  storeElementData = (width, ref, index) => {
+    this.recipients[index].translate = width * window.innerWidth;
+    this.recipients[index].ref = ref;
+  };
+  animateLeft = index => {
+    const ratio = eleWidth / windowWidth;
+    const wait = ratio / 10000;
+
+    setTimeout(() => this.forceUpdate(), this.prevRecipientsTimeToMove);
+    this.prevRecipientsTimeToMove = wait;
+  };
+  waitForPrevToMove = (wait, index, cb) => {
+    if (recipientsTimeToMove[index] !== wait) recipientsTimeToMove.push();
+    recipientsTimeToMove.map(ms => {
+      const promise = new Promise(function(resolve, reject) {
+        setTimeout(() => resolve(), ms);
+      });
     });
   };
-  __Add = () => {
-    const user = {
-      name: "ATLE!!",
-      cudosType: "avocado"
-    };
-    this.addReceiver(user);
-  };
   render() {
-    console.log(this.state.paddingLeft);
+    console.log(this.recipients);
     return (
       <div className="cudos-ticker">
         <div className="cudos-ticker__inner">
-          {this.props.cudosReceivers.map((receiver, index) => {
+          {this.recipients.map((recipient, index) => {
             return (
               <CudosReceiver
-                className="cudos-ticker__receiver"
-                key={index}
-                ref={this.cudosReceiverRef}
-                addCudosReceiverPadding={this.addCudosReceiverPadding}
-                rollingText={rollingText(window.innerWidth)}
+                key={recipient.id}
+                index={index}
+                storeElementData={this.storeElementData}
+                loadRecipient={this.loadRecipient}
+                animateLeft={this.animateLeft}
+                translate={recipient.translate}
               >
-                <p>{receiver.name}</p>
+                <p>{recipient.name}</p>
                 <img
-                  src={`../src/assets/${receiver.cudosType}.png`}
+                  src={`../src/assets/${recipient.cudosType}.png`}
                   className="cudos-ticker__icon"
                 />
               </CudosReceiver>
