@@ -32,7 +32,10 @@ class Display extends React.Component {
         ...userLists
       });
       MOCKrequestLoop(userLists, (cudosReceivers, userLists) => {
-        this.setState({ cudosReceivers, ...userLists });
+        this.setState({
+          cudosReceivers: [...this.state.cudosReceivers, ...cudosReceivers],
+          ...userLists
+        });
       });
     });
   }

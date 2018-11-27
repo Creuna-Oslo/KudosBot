@@ -1,22 +1,55 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import CudosReceiver from "../cudos-receiver";
 import { resolve } from "url";
+import { waitForPrevToMove } from "../../utils/animation";
 
 class CudosTicker extends React.Component {
-  prevRecipientsTimeToMove = 0;
+  static propTypes = {
+    cudosReceivers: PropTypes.array,
+    clearRecipients: PropTypes.func
+  };
+
   readyForRecipient = true;
   pendingRecipients = [];
-  recipients = [];
 
+  cudosRecieverRefs = [];
+
+  state = {
+    recipients: [],
+    delaySum: 0
+  };
+  /*
   componentDidUpdate() {
     if (this.props.cudosReceivers.length !== 0) {
-      this.pendRecipients(this.props.cudosReceivers);
+      this.pendingRecipients = this.props.cudosReceivers;
+      if (this.state.recipients.length === 0) this.addRecipients();
     }
   }
+*/
+  addDelay = delay => {
+    this.setState(prevState => ({
+      delaySum: prevState.delaySum + delay
+    }));
+  };
+
+  addRecipients = () => {
+    this.setState({
+      recipients: this.state.recipients.concat(...this.pendingRecipients)
+    });
+
+    this.pendingRecipients = [];
+    this.props.clearRecipients();
+  };
+
   tryAddingRecipients = () => {
     if (this.readyForRecipient) {
-      this.recipients.push(...this.pendingRecipients);
+      console.log("adding recipient");
+      this.setState({
+        recipients: this.state.recipients.concat(...this.pendingRecipients)
+      });
+
       this.pendingRecipients = [];
       this.props.clearRecipients();
     }
@@ -26,40 +59,74 @@ class CudosTicker extends React.Component {
     this.pendingRecipients = recipients;
     this.tryAddingRecipients();
   };
+  /*
+  storeElementData = (width, index) => {
+    const recipient = JSON.parse(JSON.stringify(this.state.recipients[index]));
 
-  storeElementData = (width, ref, index) => {
-    this.recipients[index].translate = width * window.innerWidth;
-    this.recipients[index].ref = ref;
+    recipient.width = width;
+    const ratio = width / window.innerWidth;
+    const wait = ratio * 10000;
+    recipient.wait = wait;
+    recipient.transitionTime = wait / 1000 + 10;
+    this.updateRecipients(recipient, index);
   };
+*/
+  updateRecipients = (recipient, index, cb) => {
+    this.setState(
+      prevState => ({
+        recipients: [
+          ...prevState.recipients.slice(0, index),
+          recipient,
+          ...prevState.recipients.slice(index + 1)
+        ]
+      }),
+      () => {
+        if (cb) cb();
+      }
+    );
+  };
+  /*
+  resetTranslate = (recipient, index) => {
+    recipient.translate = 0;
+    setTimeout(() => {
+      this.updateRecipients(recipient, index);
+    }, recipient.transitionTime * 1000);
+  };
+
   animateLeft = index => {
-    const ratio = eleWidth / windowWidth;
-    const wait = ratio / 10000;
+    const prevRecipient = this.state.recipients[index - 1];
+    const wait = prevRecipient ? prevRecipient.wait : 0;
 
-    setTimeout(() => this.forceUpdate(), this.prevRecipientsTimeToMove);
-    this.prevRecipientsTimeToMove = wait;
-  };
-  waitForPrevToMove = (wait, index, cb) => {
-    if (recipientsTimeToMove[index] !== wait) recipientsTimeToMove.push();
-    recipientsTimeToMove.map(ms => {
-      const promise = new Promise(function(resolve, reject) {
-        setTimeout(() => resolve(), ms);
+    const recipient = JSON.parse(JSON.stringify(this.state.recipients[index]));
+    recipient.translate = recipient.width + window.innerWidth;
+
+    setTimeout(() => {
+      this.updateRecipients(recipient, index, () => {
+        if (index < this.state.recipients.length - 1) {
+          this.animateLeft(index + 1);
+        }
+        this.resetTranslate(JSON.parse(JSON.stringify(recipient)), index);
       });
-    });
+    }, wait);
   };
+*/
   render() {
-    console.log(this.recipients);
     return (
       <div className="cudos-ticker">
         <div className="cudos-ticker__inner">
-          {this.recipients.map((recipient, index) => {
+          {this.props.cudosReceivers.map((recipient, index) => {
+            const animateNext = this.cudosRecieverRefs[index + 1]
+              ? this.cudosRecieverRefs[index + 1].loop
+              : null;
             return (
               <CudosReceiver
+                ref={ref => (this.cudosRecieverRefs[index] = ref)}
                 key={recipient.id}
+                animateNext={animateNext}
+                delaySum={this.state.delaySum}
+                addDelay={this.addDelay}
+                addRecipients={this.addRecipients}
                 index={index}
-                storeElementData={this.storeElementData}
-                loadRecipient={this.loadRecipient}
-                animateLeft={this.animateLeft}
-                translate={recipient.translate}
               >
                 <p>{recipient.name}</p>
                 <img

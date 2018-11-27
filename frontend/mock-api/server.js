@@ -9,7 +9,9 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.post("/giveCudos", (req, res) => {
+app.get("/giveCudos", (req, res) => {
+  console.log("GIVING CUDOS");
+  res.send("gave cudos");
   fs.readFile("./mock/mock.json", (err, content) => {
     if (err) throw err;
     let parseJson = JSON.parse(content);
@@ -23,7 +25,9 @@ app.post("/giveCudos", (req, res) => {
     });
   });
 });
+
 app.get("/resetCudos", (req, res) => {
+  console.log("Reset cudos");
   fs.readFile("./mock/mock.json", (err, content) => {
     if (err) throw err;
     let parseJson = JSON.parse(content);

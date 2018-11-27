@@ -44,16 +44,10 @@ export function MOCKgetAll() {
 }
 export function MOCKgiveCudos() {
   //TODO make get || send {name, cudosType}
-  fetch("http://localhost:3000/giveCudos", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify()
-  });
+  return fetch("http://127.0.0.1:3000/giveCudos");
 }
 export function MOCKresetCudos() {
-  fetch("http://localhost:3000/resetCudos");
+  return fetch("http://127.0.0.1:3000/resetCudos");
 }
 ////////////////////
 export function requestLoop(previousUserLists, callback) {
