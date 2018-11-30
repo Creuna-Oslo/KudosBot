@@ -1,58 +1,53 @@
 import React from "react";
-import { rollingText } from "../../utils/keyframes";
+import PropTypes from "prop-types";
 
-import CudosReceiver from "../cudos-receiver";
+import CudosRecipientPassenger from "../cudos-recipient-passenger";
+import CudosRecipientPilot from "../cudos-recipient-Pilot";
 
 class CudosTicker extends React.Component {
+  static propTypes = {
+    cudosReceivers: PropTypes.array
+  };
+
+  cudosRecieverRefs = [];
+
   state = {
-    paddingLeft: []
-  };
-  cudosReceiverRef = React.createRef();
-
-  addCudosReceiverPadding = () => {
-    console.log(this.cudosReceiverRef.current);
-    /*this.setState({
-      paddingLeft: paddingLeft.concat(this.cudosReceiverRef.current)
-    });*/
+    recipients: [],
+    delaySum: 0
   };
 
-  componentDidMount() {
-    setTimeout(() => console.log(this.cudosReceiverRef.current), 300);
-  }
-  addReceiver = user => {
-    const cudosReceivers = this.state.cudosReceivers;
-    cudosReceivers.push(user);
-    this.setState({
-      cudosReceivers
-    });
+  addDelay = delay => {
+    this.setState(prevState => ({
+      delaySum: prevState.delaySum + delay
+    }));
   };
-  __Add = () => {
-    const user = {
-      name: "ATLE!!",
-      cudosType: "avocado"
-    };
-    this.addReceiver(user);
-  };
+
   render() {
-    console.log(this.state.paddingLeft);
     return (
       <div className="cudos-ticker">
         <div className="cudos-ticker__inner">
-          {this.props.cudosReceivers.map((receiver, index) => {
-            return (
-              <CudosReceiver
-                className="cudos-ticker__receiver"
-                key={index}
-                ref={this.cudosReceiverRef}
-                addCudosReceiverPadding={this.addCudosReceiverPadding}
-                rollingText={rollingText(window.innerWidth)}
-              >
-                <p>{receiver.name}</p>
-                <img
-                  src={`../src/assets/${receiver.cudosType}.png`}
-                  className="cudos-ticker__icon"
+          {this.props.cudosReceivers.map((recipient, index) => {
+            const resetNextElement = this.cudosRecieverRefs[index + 1]
+              ? this.cudosRecieverRefs[index + 1].resetPassengerTransition
+              : null;
+            if (index === 0)
+              return (
+                <CudosRecipientPilot
+                  key={recipient.id}
+                  resetNextElement={resetNextElement}
+                  delaySum={this.state.delaySum}
+                  addDelay={this.addDelay}
+                  recipient={recipient}
                 />
-              </CudosReceiver>
+              );
+            return (
+              <CudosRecipientPassenger
+                ref={ref => (this.cudosRecieverRefs[index] = ref)}
+                key={recipient.id}
+                resetNextElement={resetNextElement}
+                addDelay={this.addDelay}
+                recipient={recipient}
+              />
             );
           })}
         </div>
