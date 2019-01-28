@@ -8,7 +8,6 @@ const timer = {
   },
   end: () => {
     const current = new Date();
-    if (timer.startTime > current) console.log(time.startTime, current);
     return current - timer.startTime;
   }
 };
@@ -26,19 +25,19 @@ class CudosRecipientPassenger extends React.Component {
   };
 
   resetPassengerTransition = () => {
-    const virgin = Boolean(!this.state.translate);
+    const firstTime = !this.state.translate;
     let nextState = { translate: this.state.translate };
 
-    if (virgin) {
+    if (firstTime) {
       timer.start();
       nextState = { ...this.pendingState };
     }
+
     window.requestAnimationFrame(() => {
       this.setState(
         {
           translate: 0
         },
-
         () => {
           window.requestAnimationFrame(() => {
             this.setState(
@@ -46,7 +45,7 @@ class CudosRecipientPassenger extends React.Component {
                 ...nextState
               },
               () => {
-                if (virgin) {
+                if (firstTime) {
                   this.props.addDelay(timer.end());
                 }
 
@@ -75,7 +74,14 @@ class CudosRecipientPassenger extends React.Component {
       delay,
       duration
     };
-    this.props.addDelay(delay);
+
+    this.props.addDelay(delay, animationTimeout => {
+      if (animationTimeout > this.props.transitionDuration) {
+        const diff = animationTimeout - this.props.transitionDuration;
+        if (diff < delay) return this.props.addAdditionalTimeout(delay + diff);
+        this.props.addAdditionalTimeout(delay);
+      }
+    });
   }
 
   render() {

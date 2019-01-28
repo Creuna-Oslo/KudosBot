@@ -1,9 +1,9 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
 class CudosRecipientPilot extends React.Component {
   static propTypes = {
-    delaySum: PropTypes.number,
+    animationTimeout: PropTypes.number,
     addDelay: PropTypes.func
   };
 
@@ -42,36 +42,25 @@ class CudosRecipientPilot extends React.Component {
     });
   };
 
-  getAdditionalDelay = (delay, startDelaySum, duration) => {
-    if (this.props.delaySum < duration) return null;
-    if (startDelaySum < duration) return this.props.delaySum - duration;
-    return this.props.delaySum - delay;
-  };
-
-  delayAnimation = (delay, duration, totalDelay = delay) => {
-    const startDelaySum = this.props.delaySum;
+  delayAnimation = (timeout, duration, totalTimeout = timeout) => {
+    const startanimationTimeout = this.props.animationTimeout;
+    this.props.clearAdditionalTimeout();
     setTimeout(() => {
-      const additionalDelay = this.getAdditionalDelay(
-        totalDelay || delay,
-        startDelaySum,
-        duration
-      );
-      if (additionalDelay) {
+      if (this.props.additionalTimeout) {
         return this.delayAnimation(
-          additionalDelay,
+          this.props.additionalTimeout,
           duration,
-          additionalDelay + totalDelay
+          this.props.additionalTimeout + totalTimeout
         );
       }
-
       this.resetPilotTransition(this.animationController);
-    }, delay);
+    }, timeout);
   };
 
   animationController = () => {
     const duration = this.state.duration * 1000;
-    const delaySum = this.props.delaySum;
-    const resetTime = Math.max(duration, delaySum);
+    const animationTimeout = this.props.animationTimeout;
+    const resetTime = Math.max(duration, animationTimeout);
 
     this.delayAnimation(resetTime, duration);
   };
@@ -94,6 +83,7 @@ class CudosRecipientPilot extends React.Component {
         this.animationController();
       }
     );
+    this.props.setTransitionDuration(duration * 1000);
     this.props.addDelay(delay);
   }
 

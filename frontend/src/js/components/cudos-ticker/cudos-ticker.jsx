@@ -13,13 +13,41 @@ class CudosTicker extends React.Component {
 
   state = {
     recipients: [],
-    delaySum: 0
+    animationTimeout: 0,
+    additionalTimeout: 0,
+    transitionDuration: 0
   };
 
-  addDelay = delay => {
+  addDelay = (delay, cb) => {
+    let newTimeout;
+    this.setState(
+      prevState => {
+        newTimeout = prevState.animationTimeout + delay;
+
+        return {
+          animationTimeout: newTimeout
+        };
+      },
+      () => {
+        if (cb) cb(newTimeout);
+      }
+    );
+  };
+
+  addAdditionalTimeout = additionalTimeout => {
     this.setState(prevState => ({
-      delaySum: prevState.delaySum + delay
+      additionalTimeout: prevState.additionalTimeout + additionalTimeout
     }));
+  };
+
+  clearAdditionalTimeout = () => {
+    this.setState({
+      additionalTimeout: 0
+    });
+  };
+
+  setTransitionDuration = duration => {
+    this.setState({ transitionDuration: duration });
   };
 
   render() {
@@ -35,9 +63,12 @@ class CudosTicker extends React.Component {
                 <CudosRecipientPilot
                   key={recipient.id}
                   resetNextElement={resetNextElement}
-                  delaySum={this.state.delaySum}
+                  animationTimeout={this.state.animationTimeout}
                   addDelay={this.addDelay}
                   recipient={recipient}
+                  additionalTimeout={this.state.additionalTimeout}
+                  clearAdditionalTimeout={this.clearAdditionalTimeout}
+                  setTransitionDuration={this.setTransitionDuration}
                 />
               );
             return (
@@ -47,6 +78,8 @@ class CudosTicker extends React.Component {
                 resetNextElement={resetNextElement}
                 addDelay={this.addDelay}
                 recipient={recipient}
+                addAdditionalTimeout={this.addAdditionalTimeout}
+                transitionDuration={this.state.transitionDuration}
               />
             );
           })}
