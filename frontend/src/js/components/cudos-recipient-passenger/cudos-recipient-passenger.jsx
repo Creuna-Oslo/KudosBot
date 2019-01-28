@@ -1,5 +1,5 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
 const timer = {
   startTime: undefined,
@@ -14,7 +14,15 @@ const timer = {
 
 class CudosRecipientPassenger extends React.Component {
   static propTypes = {
-    addDelay: PropTypes.func
+    resetNextElement: PropTypes.func,
+    addDelay: PropTypes.func,
+    recipient: PropTypes.shape({
+      name: PropTypes.string,
+      cudosType: PropTypes.string,
+      id: PropTypes.string
+    }),
+    addAdditionalTimeout: PropTypes.func,
+    transitionDuration: PropTypes.number
   };
 
   ref = React.createRef();
@@ -61,26 +69,35 @@ class CudosRecipientPassenger extends React.Component {
     });
   };
 
+  waitForImageRender = resolve => {
+    const imageWidth = this.ref.current.childNodes[1].offsetWidth;
+    if (imageWidth > 0) resolve();
+    else setTimeout(() => this.waitForImageRender(resolve), 10);
+  };
+
   componentDidMount() {
-    const width = this.ref.current.offsetWidth;
-    const ratio = width / window.innerWidth;
-    const delay = ratio * 10000;
+    new Promise(this.waitForImageRender).then(() => {
+      const width = this.ref.current.offsetWidth;
+      const ratio = width / window.innerWidth;
+      const delay = ratio * 10000;
 
-    const duration = ratio * 10 + 10;
-    const translate = width + window.innerWidth;
+      const duration = ratio * 10 + 10;
+      const translate = width + window.innerWidth;
 
-    this.pendingState = {
-      translate,
-      delay,
-      duration
-    };
+      this.pendingState = {
+        translate,
+        delay,
+        duration
+      };
 
-    this.props.addDelay(delay, animationTimeout => {
-      if (animationTimeout > this.props.transitionDuration) {
-        const diff = animationTimeout - this.props.transitionDuration;
-        if (diff < delay) return this.props.addAdditionalTimeout(delay + diff);
-        this.props.addAdditionalTimeout(delay);
-      }
+      this.props.addDelay(delay, animationTimeout => {
+        if (animationTimeout > this.props.transitionDuration) {
+          const diff = animationTimeout - this.props.transitionDuration;
+          if (diff < delay)
+            return this.props.addAdditionalTimeout(delay + diff);
+          this.props.addAdditionalTimeout(delay);
+        }
+      });
     });
   }
 

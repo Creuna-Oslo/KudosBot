@@ -4,7 +4,17 @@ import PropTypes from 'prop-types';
 class CudosRecipientPilot extends React.Component {
   static propTypes = {
     animationTimeout: PropTypes.number,
-    addDelay: PropTypes.func
+    resetNextElement: PropTypes.func,
+    animationTimeout: PropTypes.number,
+    addDelay: PropTypes.func,
+    recipient: PropTypes.shape({
+      name: PropTypes.string,
+      cudosType: PropTypes.string,
+      id: PropTypes.string
+    }),
+    additionalTimeout: PropTypes.number,
+    clearAdditionalTimeout: PropTypes.func,
+    setTransitionDuration: PropTypes.func
   };
 
   ref = React.createRef();
@@ -30,8 +40,9 @@ class CudosRecipientPilot extends React.Component {
               },
               () => {
                 setTimeout(() => {
-                  if (this.props.resetNextElement)
+                  if (this.props.resetNextElement) {
                     this.props.resetNextElement();
+                  }
                 }, this.state.delay);
                 cb();
               }
@@ -43,9 +54,8 @@ class CudosRecipientPilot extends React.Component {
   };
 
   delayAnimation = (timeout, duration, totalTimeout = timeout) => {
-    const startanimationTimeout = this.props.animationTimeout;
     this.props.clearAdditionalTimeout();
-    setTimeout(() => {
+    this.timeout = setTimeout(() => {
       if (this.props.additionalTimeout) {
         return this.delayAnimation(
           this.props.additionalTimeout,
@@ -65,26 +75,37 @@ class CudosRecipientPilot extends React.Component {
     this.delayAnimation(resetTime, duration);
   };
 
+  waitForImageRender = resolve => {
+    const imageWidth = this.ref.current.childNodes[1].offsetWidth;
+    if (imageWidth > 0) resolve();
+    else setTimeout(() => this.waitForImageRender(resolve), 10);
+  };
+
   componentDidMount() {
-    const width = this.ref.current.offsetWidth;
-    const ratio = width / window.innerWidth;
-    const delay = ratio * 10000;
+    new Promise(this.waitForImageRender).then(() => {
+      const width = this.ref.current.offsetWidth;
+      const ratio = width / window.innerWidth;
+      const delay = ratio * 10000;
 
-    const duration = ratio * 10 + 10;
-    const translate = width + window.innerWidth;
+      const duration = ratio * 10 + 10;
+      const translate = width + window.innerWidth;
+      this.setState(
+        {
+          translate,
+          delay,
+          duration
+        },
+        () => {
+          this.animationController();
+        }
+      );
+      this.props.setTransitionDuration(duration * 1000);
+      this.props.addDelay(delay);
+    });
+  }
 
-    this.setState(
-      {
-        translate,
-        delay,
-        duration
-      },
-      () => {
-        this.animationController();
-      }
-    );
-    this.props.setTransitionDuration(duration * 1000);
-    this.props.addDelay(delay);
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
   render() {

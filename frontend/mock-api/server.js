@@ -1,47 +1,63 @@
-const express = require("express");
-const fs = require("fs");
+const express = require('express');
+const fs = require('fs');
 
 const app = express();
 
 app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
   next();
 });
 
-app.get("/giveCudos", (req, res) => {
-  console.log("GIVING CUDOS");
-  res.send("gave cudos");
-  fs.readFile("./mock/mock.json", (err, content) => {
+app.get('/giveCudos', (req, res) => {
+  console.log('GIVING CUDOS');
+  res.send('gave cudos');
+  fs.readFile('./mock/mock.json', (err, content) => {
     if (err) throw err;
-    let parseJson = JSON.parse(content);
+    const userList = JSON.parse(content).userList;
+    const cudosRecipients = JSON.parse(content).cudosRecipients;
+    const cudosTypes = ['avocado', 'tada', 'unicorn_face'];
+    const user = userList[Math.floor(Math.random() * userList.length)];
+    const cudosType = cudosTypes[Math.floor(Math.random() * cudosTypes.length)];
+    user[cudosType] += 1;
 
-    const cudosTypes = ["avocado", "tada", "unicorn_face"];
-    parseJson[Math.floor(Math.random() * parseJson.length)][
-      cudosTypes[Math.floor(Math.random() * cudosTypes.length)]
-    ] += 1;
-    fs.writeFile("./mock/mock.json", JSON.stringify(parseJson), err => {
-      if (err) throw err;
-    });
+    const cudosRecipient = {
+      name: user.id,
+      cudosType,
+      id: `${user._id}+${Math.random() * 9999}`
+    };
+    cudosRecipients.push(cudosRecipient);
+    fs.writeFile(
+      './mock/mock.json',
+      JSON.stringify({ cudosRecipients, userList }),
+      err => {
+        if (err) throw err;
+      }
+    );
   });
 });
 
-app.get("/resetCudos", (req, res) => {
-  console.log("Reset cudos");
-  fs.readFile("./mock/mock.json", (err, content) => {
+app.get('/resetCudos', (req, res) => {
+  console.log('Reset cudos');
+  fs.readFile('./mock/mock.json', (err, content) => {
     if (err) throw err;
-    let parseJson = JSON.parse(content);
-    parseJson.map(user => {
+    const cudosRecipients = [];
+    const userList = JSON.parse(content).userList;
+    userList.map(user => {
       user.avocado = 0;
       user.tada = 0;
       user.unicorn_face = 0;
     });
-    fs.writeFile("./mock/mock.json", JSON.stringify(parseJson), err => {
-      if (err) throw err;
-    });
+    fs.writeFile(
+      './mock/mock.json',
+      JSON.stringify({ cudosRecipients, userList }),
+      err => {
+        if (err) throw err;
+      }
+    );
   });
 });
 
 app.listen(3000, () => {
-  console.log("listening on 3000");
+  console.log('listening on 3000');
 });

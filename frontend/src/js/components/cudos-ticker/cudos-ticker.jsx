@@ -1,15 +1,15 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react';
+import PropTypes from 'prop-types';
 
-import CudosRecipientPassenger from "../cudos-recipient-passenger";
-import CudosRecipientPilot from "../cudos-recipient-Pilot";
+import CudosRecipientPassenger from '../cudos-recipient-passenger';
+import CudosRecipientPilot from '../cudos-recipient-Pilot';
 
 class CudosTicker extends React.Component {
   static propTypes = {
-    cudosReceivers: PropTypes.array
+    cudosRecipients: PropTypes.array
   };
 
-  cudosRecieverRefs = [];
+  cudosRecipientsRefs = [];
 
   state = {
     recipients: [],
@@ -54,9 +54,9 @@ class CudosTicker extends React.Component {
     return (
       <div className="cudos-ticker">
         <div className="cudos-ticker__inner">
-          {this.props.cudosReceivers.map((recipient, index) => {
-            const resetNextElement = this.cudosRecieverRefs[index + 1]
-              ? this.cudosRecieverRefs[index + 1].resetPassengerTransition
+          {this.props.cudosRecipients.map((recipient, index) => {
+            const resetNextElement = this.cudosRecipientsRefs[index + 1]
+              ? this.cudosRecipientsRefs[index + 1].resetPassengerTransition
               : null;
             if (index === 0)
               return (
@@ -73,7 +73,7 @@ class CudosTicker extends React.Component {
               );
             return (
               <CudosRecipientPassenger
-                ref={ref => (this.cudosRecieverRefs[index] = ref)}
+                ref={ref => (this.cudosRecipientsRefs[index] = ref)}
                 key={recipient.id}
                 resetNextElement={resetNextElement}
                 addDelay={this.addDelay}

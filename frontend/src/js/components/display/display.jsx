@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   getAll,
   requestLoop,
@@ -6,34 +6,26 @@ import {
   MOCKresetCudos,
   MOCKrequestLoop,
   MOCKgiveCudos
-} from "../../utils/api-helper.js";
+} from '../../utils/api-helper.js';
 
-import TopThree from "../top-three";
-import CudosTicker from "../cudos-ticker";
+import TopThree from '../top-three';
+import CudosTicker from '../cudos-ticker';
 
 class Display extends React.Component {
   state = {
     isLoading: true,
-    cudosReceivers: []
+    cudosRecipients: []
   };
   componentDidMount() {
-    /*getAll().then(userLists => {
+    MOCKgetAll().then(data => {
       this.setState({
         isLoading: false,
-        ...userLists
+        ...data.userLists,
+        cudosRecipients: data.cudosRecipients
       });
-      requestLoop(userLists, (cudosReceiver, userLists) => {
-        this.setState({ cudosReceiver, ...userLists });
-      });
-    });*/
-    MOCKgetAll().then(userLists => {
-      this.setState({
-        isLoading: false,
-        ...userLists
-      });
-      MOCKrequestLoop(userLists, (cudosReceivers, userLists) => {
+      MOCKrequestLoop((userLists, cudosRecipients) => {
         this.setState({
-          cudosReceivers: [...this.state.cudosReceivers, ...cudosReceivers],
+          cudosRecipients,
           ...userLists
         });
       });
@@ -47,7 +39,7 @@ class Display extends React.Component {
   }
   clearRecipients = () => {
     this.setState({
-      cudosReceivers: []
+      cudosRecipients: []
     });
   };
   render() {
@@ -58,21 +50,20 @@ class Display extends React.Component {
         <div className="cudos">
           <CudosTicker
             ref={ref => (this.ref = ref)}
-            cudosReceivers={this.state.cudosReceivers}
-            clearRecipients={() => this.clearRecipients()}
+            cudosRecipients={this.state.cudosRecipients}
           />
           <div className="cudos-display">
             <button onClick={() => this.__giveCudos()} />
             <TopThree
-              className={"unicorn_face"}
+              className={'unicorn_face'}
               ranking={this.state.topUnicorn_face.slice(0, 3)}
             />
             <TopThree
-              className={"avocado"}
+              className={'avocado'}
               ranking={this.state.topAvocado.slice(0, 3)}
             />
             <TopThree
-              className={"tada"}
+              className={'tada'}
               ranking={this.state.topTada.slice(0, 3)}
             />
             <button onClick={() => this.__resetCudos()} />

@@ -1,15 +1,13 @@
-import React from "react";
-import FlipMotion from "react-flip-motion";
+import React from 'react';
+import PropTypes from 'prop-types';
+import FlipMotion from 'react-flip-motion';
 
-import User from "../user";
+import User from '../user';
 
-const convertToDisplayName = cudosType => {
-  const cudosTypes = {
-    tada: "confetti",
-    unicorn_face: "unicorn",
-    avocado: "avocado"
-  };
-  return cudosTypes[cudosType];
+const cudosTypes = {
+  tada: 'confetti',
+  unicorn_face: 'unicorn',
+  avocado: 'avocado'
 };
 
 const TopThree = ({ className, ranking }) => {
@@ -21,12 +19,12 @@ const TopThree = ({ className, ranking }) => {
           {ranking.map((user, index) => {
             return (
               <User
-                key={user.id}
+                key={user._id}
                 className={`${className}__top-user`}
                 placement={index + 1}
                 name={user.id}
                 cudos={user[className]}
-                cudosType={convertToDisplayName(className)}
+                cudosType={cudosTypes[className]}
               />
             );
           })}
@@ -35,4 +33,10 @@ const TopThree = ({ className, ranking }) => {
     </div>
   );
 };
+
+TopThree.propTypes = {
+  className: PropTypes.string,
+  ranking: PropTypes.array
+};
+
 export default TopThree;
