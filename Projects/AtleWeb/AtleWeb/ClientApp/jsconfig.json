@@ -1,0 +1,10 @@
+﻿using System;
+namespace AtleWeb.ClientApp
+{
+ public class jsconfig
+ {
+   public jsconfig()
+   {
+   }
+ }
+}

@@ -1,0 +1,39 @@
+Arguments: 
+  /Users/atle.kristiansen/.nvm/versions/node/v12.13.0/bin/node /usr/local/Cellar/yarn/1.9.4/libexec/bin/yarn.js add react react-dom webpack babel-loader @babel/core
+
+PATH: 
+  /Users/atle.kristiansen/.nvm/versions/node/v12.13.0/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin:/Users/atle.kristiansen/.nvm/versions/node/v11.13.0/bin
+
+Yarn version: 
+  1.9.4
+
+Node version: 
+  12.13.0
+
+Platform: 
+  darwin x64
+
+Trace: 
+  Error: https://registry.yarnpkg.com/react: ETIMEDOUT
+      at Timeout._onTimeout (/usr/local/Cellar/yarn/1.9.4/libexec/lib/cli.js:138128:19)
+      at listOnTimeout (internal/timers.js:531:17)
+      at processTimers (internal/timers.js:475:7)
+
+npm manifest: 
+  {
+    "name": "atle",
+    "version": "1.0.0",
+    "description": "Atle website",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
